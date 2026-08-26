@@ -1,0 +1,12 @@
+node_modules/
+dist/
+src-tauri/target/
+*.log
+*.tmp
+*.bak
+*.tsbuildinfo
+/vite.config.js
+/vite.config.d.ts
+test1.txt
+test2.txt
+!GALNAVI_IMPLEMENTATION_PROMPT.md

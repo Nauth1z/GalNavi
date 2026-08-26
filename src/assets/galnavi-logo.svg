@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">GalNavi Nauthiz logo</title>
+  <desc id="desc">A geometric mark combining the Nauthiz rune with the letter N.</desc>
+  <g fill="#29333C">
+    <path d="M120 169 158 143v205l-38 27Z"/>
+    <path d="m237 74 42-29v422l-42-29Z"/>
+    <path d="m354 196 38-27v206l-38-27Z"/>
+  </g>
+  <path fill="#5E7488" d="m120 151 35-24 237 217v49l-35 24-237-218Z"/>
+</svg>
