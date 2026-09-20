@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { GalNaviProject } from '../domain/model';
 
 export type WorkspaceView = 'graph' | 'source';
 export type GraphMode = 'play' | 'edit';
@@ -38,3 +39,13 @@ export const useUiStore = create<UiState>((set) => ({
   hideDiagnostics: () => set({ diagnosticsOpen: false }),
   setError: (error) => set({ error }),
 }));
+
+export function requestCurrentProjectFocus(project: GalNaviProject): string | undefined {
+  const session = project.sessions.find((item) => item.id === project.activeSessionId) ?? project.sessions[0];
+  const current = project.guide.nodes.find((node) => node.id === session?.currentNodeId)
+    ?? project.guide.nodes.find((node) => node.kind === 'root')
+    ?? project.guide.nodes[0];
+  if (!current) return undefined;
+  useUiStore.setState((state) => ({ view: 'graph', focusNodeId: current.id, focusRequest: state.focusRequest + 1 }));
+  return current.id;
+}

@@ -52,7 +52,8 @@ export default function App() {
     } catch (error) { ui.setError(`无法保存并退出当前项目：${error instanceof Error ? error.message : '本地存储不可用'}`); }
   };
   if (ui.miniMode) return <><MiniMode/><BranchDialog/></>;
-  return <div className="app-shell"><WindowChrome/><TopBar/><div className="app-body"><ProjectSidebar onNew={() => void beginNewProject()}/><main className="workspace">
+  const sidebarVisible = !project || ui.graphMode === 'edit';
+  return <div className={`app-shell${sidebarVisible ? '' : ' sidebar-hidden'}`}><WindowChrome/><TopBar/><div className="app-body"><ProjectSidebar visible={sidebarVisible} onNew={() => void beginNewProject()}/><main className="workspace">
     {!project || showNew ? <NewProjectPanel onCreated={() => setShowNew(false)}/> : <>
       <div className="view-tabs"><nav aria-label="工作区视图">{views.map(({ id, label, icon: Icon }) => <button key={id} className={ui.view === id ? 'active' : ''} aria-pressed={ui.view === id} onClick={() => ui.setView(id)}><Icon size={16}/>{label}</button>)}</nav>
         {parsedStats && <div className="parse-stats"><span>{parsedStats.nodes} 节点</span><span>{parsedStats.choiceGroups} 选择组</span><span>{parsedStats.saves} SAVE</span><span>{parsedStats.loads} LOAD</span><span>{parsedStats.endings} 结局</span><button className="warning" onClick={() => ui.showDiagnostics('warning')}><AlertTriangleIcon/>警告 {parsedStats.warnings}</button><button className="error" onClick={() => ui.showDiagnostics('error')}><ErrorIcon/>错误 {parsedStats.errors}</button><button onClick={() => void reparse()}>重新解析</button></div>}

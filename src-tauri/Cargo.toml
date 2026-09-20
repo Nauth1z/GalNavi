@@ -1,6 +1,6 @@
 [package]
 name = "galnavi"
-version = "0.1.0"
+version = "0.2.0"
 description = "Galgame 攻略路线导航器"
 authors = ["GalNavi contributors"]
 edition = "2021"

@@ -107,6 +107,21 @@ describe('parser pipeline', () => {
     expect(result.stats.endings).toBe(3);
   });
 
+  it.each([
+    'END', 'END1', 'END 2', 'END-3', 'END #4', 'END NO.5',
+    'ENDING', 'ENDING1', 'ENDING 2', 'ENDING-3', 'ＥＮＤＩＮＧ４',
+  ])('recognizes numbered ending marker %s', (marker) => {
+    const [token] = tokenizeLines(normalizeText(marker));
+    expect(token?.kind).toBe('ending');
+    expect(token?.metadata?.endingType).toBe('unknown');
+    expect(parseGuide(marker).stats.endings).toBe(1);
+  });
+
+  it.each(['ENDLESS NIGHT', 'ENDINGLY', 'WEEKEND1', 'FRIEND2'])('does not mistake ordinary word %s for an ending', (text) => {
+    const [token] = tokenizeLines(normalizeText(text));
+    expect(token?.kind).not.toBe('ending');
+  });
+
   it('reports empty and unusual text', () => {
     expect(parseGuide('   ').diagnostics[0]?.code).toBe('EMPTY_GUIDE');
     expect(parseGuide('🧩🧩🧩').diagnostics.some((item) => item.code === 'UNKNOWN_TEXT')).toBe(true);

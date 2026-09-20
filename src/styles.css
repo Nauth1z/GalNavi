@@ -33,6 +33,7 @@
   --inspector-width: 296px;
   --status-island-clearance: 76px;
   --transition-fast: 160ms ease;
+  --transition-layout: 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * { box-sizing: border-box; }
@@ -70,6 +71,7 @@ label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 
 .window-controls .window-close:hover { color: #fff; background: #c42b1c; }
 
 .app-shell { position: relative; width: 100%; height: 100vh; display: grid; grid-template-rows: 48px minmax(0, 1fr); overflow: hidden; background: var(--color-canvas); }
+.app-shell.sidebar-hidden { --sidebar-width: 0px; }
 .app-shell:has(> .window-chrome-zone.windowed) { padding-top: 30px; }
 .topbar { min-width: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px; background: rgba(17, 24, 39, 0.88); border-bottom: 1px solid var(--color-border); backdrop-filter: blur(14px) saturate(120%); }
 .brand { min-width: 0; display: flex; align-items: center; gap: 8px; }
@@ -93,8 +95,9 @@ label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 
 .topbar-mode-switch button.active { color: #fff; background: var(--color-primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.app-body { grid-row: 2; min-width: 0; min-height: 0; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); }
-.project-sidebar { min-width: 0; overflow: hidden; padding: 11px 8px; background: var(--color-surface); border-right: 1px solid var(--color-border); }
+.app-body { grid-row: 2; min-width: 0; min-height: 0; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); transition: grid-template-columns var(--transition-layout); }
+.project-sidebar { min-width: 0; overflow: hidden; padding: 11px 8px; opacity: 1; transform: translateX(0); background: var(--color-surface); border-right: 1px solid var(--color-border); transition: padding var(--transition-layout), opacity 150ms ease, transform var(--transition-layout), border-color var(--transition-layout); }
+.project-sidebar.mode-hidden { padding-inline: 0; opacity: 0; transform: translateX(-14px); pointer-events: none; border-right-color: transparent; }
 .sidebar-title { height: 32px; padding: 0 5px 8px; display: flex; align-items: center; justify-content: space-between; color: var(--color-text-secondary); font-size: 12px; font-weight: 650; }
 .sidebar-title > span { display: flex; align-items: center; gap: 7px; }
 .project-list { height: calc(100% - 32px); overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; }
@@ -112,7 +115,6 @@ label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 
 .project-action { opacity: 0; }
 .project-item:hover .project-action, .project-item:focus-within .project-action, .project-item.active .project-action { opacity: 0.72; }
 .project-item .project-action:hover, .project-item .project-action:focus-visible { opacity: 1; }
-
 .workspace { min-width: 0; min-height: 0; overflow: hidden; background: var(--color-canvas); }
 .welcome-panel { width: min(780px, calc(100% - 40px)); max-height: calc(100% - 36px); margin: 18px auto; padding: clamp(20px, 3vw, 30px); display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 20px; overflow: auto; background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-raised); }
 .welcome-copy { padding-bottom: 17px; border-bottom: 1px solid var(--color-border); }
@@ -239,7 +241,7 @@ label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 
 .line-action { min-width: 26px; min-height: 25px; padding: 2px; opacity: 0; background: transparent; border-color: transparent; }
 .source-line:hover .line-action, .source-line:focus-within .line-action, .line-action:focus-visible { opacity: 1; }
 
-.statusbar { position: fixed; z-index: 30; left: calc(var(--sidebar-width) + 14px); right: calc(var(--inspector-width) + 14px); bottom: 10px; width: min(760px, calc(100vw - var(--sidebar-width) - var(--inspector-width) - 28px)); min-height: 54px; margin: auto; padding: 7px 8px 7px 13px; display: flex; align-items: center; justify-content: space-between; gap: 14px; color: var(--color-text-secondary); background: rgba(15, 23, 42, 0.64); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 14px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px) saturate(125%); }
+.statusbar { position: fixed; z-index: 30; left: calc(var(--sidebar-width) + 14px); right: calc(var(--inspector-width) + 14px); bottom: 10px; width: min(760px, calc(100vw - var(--sidebar-width) - var(--inspector-width) - 28px)); min-height: 54px; margin: auto; padding: 7px 8px 7px 13px; display: flex; align-items: center; justify-content: space-between; gap: 14px; color: var(--color-text-secondary); background: rgba(15, 23, 42, 0.64); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 14px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px) saturate(125%); transition: left var(--transition-layout), width var(--transition-layout); }
 .progress-copy { min-width: 90px; max-width: min(36vw, 430px); flex: 1; display: grid; gap: 2px; }
 .progress-copy span, .progress-copy strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .progress-copy span { color: var(--color-text); font-size: 11px; }
@@ -247,6 +249,7 @@ label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 
 .progress-copy strong { color: var(--color-text-muted); font-size: 9px; font-weight: 400; }
 .statusbar nav { flex: 0 0 auto; display: flex; align-items: center; gap: 5px; }
 .statusbar button { min-height: 34px; padding: 6px 9px; font-size: 10px; }
+.advance-button:hover:not(:disabled) { background: #60a5fa; border-color: #93c5fd; box-shadow: 0 6px 18px rgba(59, 130, 246, 0.36); }
 
 .dialog-backdrop { position: fixed; inset: 0; z-index: 100; padding: 20px; display: grid; place-items: center; background: rgba(2, 6, 23, 0.72); }
 .dialog { width: min(470px, 100%); max-height: calc(100vh - 40px); overflow: auto; padding: 17px; background: rgba(23, 32, 51, 0.95); border: 1px solid var(--color-border-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-dialog); backdrop-filter: blur(14px); }

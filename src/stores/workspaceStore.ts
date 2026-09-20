@@ -7,7 +7,7 @@ import { validateGraph } from '../domain/validation';
 import { parseGuide } from '../parser';
 import { projectRepository } from '../storage/repository';
 import { useProjectListStore } from './projectListStore';
-import { useUiStore } from './uiStore';
+import { requestCurrentProjectFocus, useUiStore } from './uiStore';
 
 interface WorkspaceState {
   project?: GalNaviProject;
@@ -49,7 +49,13 @@ const replaceSession = (project: GalNaviProject, session: NonNullable<ReturnType
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   diagnostics: [], ignoredDiagnosticIds: [], pendingBranchEdgeIds: [], saving: false, guideHistory: [], guideFuture: [],
-  open: (project, diagnostics = validateGraph(project.guide)) => set({ project, diagnostics, ignoredDiagnosticIds: [], pendingBranchEdgeIds: [], saving: false, saveError: undefined, guideHistory: [], guideFuture: [] }),
+  open: (project, diagnostics = validateGraph(project.guide)) => {
+    set({ project, diagnostics, ignoredDiagnosticIds: [], pendingBranchEdgeIds: [], saving: false, saveError: undefined, guideHistory: [], guideFuture: [] });
+    const ui = useUiStore.getState();
+    ui.setGraphMode('edit');
+    ui.selectNode();
+    requestCurrentProjectFocus(project);
+  },
   close: () => set({ project: undefined, diagnostics: [], ignoredDiagnosticIds: [], pendingBranchEdgeIds: [], saving: false, saveError: undefined, guideHistory: [], guideFuture: [] }),
   commit: async (project, diagnostics = validateGraph(project.guide)) => {
     const updated = { ...project, updatedAt: Date.now() };

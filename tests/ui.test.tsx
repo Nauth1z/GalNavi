@@ -17,7 +17,7 @@ describe('localized project UI', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    useUiStore.setState({ view: 'graph', selectedNodeId: undefined, focusedLine: undefined, focusNodeId: undefined, focusRequest: 0, diagnosticsOpen: false, diagnosticFilter: 'all' });
+    useUiStore.setState({ view: 'graph', graphMode: 'play', selectedNodeId: undefined, focusedLine: undefined, focusNodeId: undefined, focusRequest: 0, diagnosticsOpen: false, diagnosticFilter: 'all' });
     useWorkspaceStore.setState({ project: undefined, diagnostics: [], ignoredDiagnosticIds: [] });
     useProjectListStore.setState({ projects: [], loading: false });
   });
@@ -80,6 +80,43 @@ describe('localized project UI', () => {
     expect(useWorkspaceStore.getState().project).toBeUndefined();
     expect(screen.queryByText(/最近路径：/)).not.toBeInTheDocument();
     expect((await projectRepository.get(project.id))?.id).toBe(project.id);
+  });
+
+  it('shows the project sidebar in edit mode and hides it in play mode', () => {
+    const project = createProject('模式测试', '第一章\n步骤甲', parseGuide('第一章\n步骤甲').graph, 9);
+    useWorkspaceStore.getState().open(project);
+    const { container } = render(<App/>);
+
+    expect(useUiStore.getState().graphMode).toBe('edit');
+    expect(screen.getByRole('complementary', { name: '项目栏' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '新建项目' })).toBeInTheDocument();
+    expect(container.querySelector('.app-shell')).not.toHaveClass('sidebar-hidden');
+
+    fireEvent.click(screen.getByRole('button', { name: '游玩' }));
+    expect(screen.queryByRole('complementary', { name: '项目栏' })).not.toBeInTheDocument();
+    expect(container.querySelector('.app-shell')).toHaveClass('sidebar-hidden');
+    expect(container.querySelector('.project-sidebar')).toHaveClass('mode-hidden');
+    expect(container.querySelector('.project-sidebar')).toHaveAttribute('inert');
+    expect(container.querySelector('.app-body')?.children).toHaveLength(2);
+    expect(container.querySelector('.app-body')?.lastElementChild).toHaveClass('workspace');
+
+    fireEvent.click(screen.getByRole('button', { name: '编辑' }));
+    expect(screen.getByRole('complementary', { name: '项目栏' })).toBeInTheDocument();
+    expect(container.querySelector('.project-sidebar')).not.toHaveClass('mode-hidden');
+  });
+
+  it('focuses the current position whenever a project opens and defaults it to the start node', () => {
+    const project = createProject('聚焦测试', '第一章\n步骤甲', parseGuide('第一章\n步骤甲').graph, 10);
+    const root = project.guide.nodes.find((node) => node.kind === 'root');
+    expect(root).toBeDefined();
+    expect(project.sessions[0]?.currentNodeId).toBe(root?.id);
+
+    useUiStore.setState({ view: 'source' });
+    useWorkspaceStore.getState().open(project);
+    expect(useUiStore.getState()).toMatchObject({ view: 'graph', focusNodeId: root?.id, focusRequest: 1 });
+
+    useWorkspaceStore.getState().open(project);
+    expect(useUiStore.getState()).toMatchObject({ focusNodeId: root?.id, focusRequest: 2 });
   });
 
   it('jumps from a warning to its source line', () => {

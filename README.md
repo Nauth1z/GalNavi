@@ -2,7 +2,7 @@
 
 GalNavi 是一款面向 Windows 10/11 x64 的本地 Galgame 攻略导航工具。它把粘贴或导入的纯文本攻略解析为带语义连接的流程图，并以路线图和带行号原文两种方式显示。路线图同时承担攻略浏览、路线选择和游玩推进。项目、人工修正和游玩进度均保存在本机，不需要账号、API Key 或网络服务。
 
-当前版本：`0.1.0`。目前仅保留 NSIS 安装程序，没有 MSI。
+当前版本：`0.2.0`。目前仅保留 NSIS 安装程序，没有 MSI。
 
 ## 功能
 
@@ -27,7 +27,7 @@ GalNavi 是一款面向 Windows 10/11 x64 的本地 Galgame 攻略导航工具�
 运行以下 NSIS 安装程序：
 
 ```text
-src-tauri/target/release/bundle/nsis/GalNavi_0.1.0_x64-setup.exe
+src-tauri/target/release/bundle/nsis/GalNavi_0.2.0_x64-setup.exe
 ```
 
 安装程序未进行商业代码签名。Windows SmartScreen 可能显示“未知发布者”，这是个人开发版本的预期行为。请只运行自己构建或从可信来源取得的安装程序。
@@ -188,6 +188,7 @@ TRUE END「星空导航」
 | `SAVE 1`、`【SAVE 2】`、`存档 3` | `save` |
 | `LOAD 1`、`【LOAD 2】` | `load`，并按槽位连接对应 SAVE |
 | `TRUE/GOOD/BAD/NORMAL END` | 带明确语义的 `ending` |
+| `END`、`END1`、`ENDING`、`ENDING1`（编号前可带空格或分隔符） | 类型为 `unknown` 的编号结局 `ending` |
 | `【回忆结局】` | 类型为 `unknown` 的普通结局 `ending` |
 
 路线图的 `root` 由 GalNavi 自动创建，不应在攻略正文中手动添加。空行只用于提高原文可读性；形成选择组的编号项应保持连续并使用相同缩进。在典型回收流程中，应先在 SAVE 后写本次选择，结局后写 LOAD，再只写尚未回收的另一个选择；不要在 LOAD 后重复列出整个选项组。每个 LOAD 槽位最好只对应一个 SAVE，否则会产生歧义诊断。

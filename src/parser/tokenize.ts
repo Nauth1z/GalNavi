@@ -13,6 +13,7 @@ const conditionPattern = /^\s*(?:条件|前提|要求|解锁|IF|WHEN|※.*(?:后
 const explicitChoicePattern = /^\s*(?:(\d+)\s*[.、．)]|[（(](\d+)[）)]|选择\s*[:：]|选项\s*(\d+)?\s*[:：])\s*(.+)$/i;
 const bulletChoicePattern = /^\s*([・●◆◇■□▶▷►★☆])\s*(.+)$/;
 const markdownBulletPattern = /^\s*[-*+]\s+(.+)$/;
+const numberedEndingPattern = /\bEND(?:ING)?(?:\s*(?:(?:NO\.?|[#:_-])\s*)?\d+)?\b/i;
 
 export function tokenizeLines(lines: NormalizedLine[]): GuideToken[] {
   return lines.map((line) => tokenizeLine(line));
@@ -89,7 +90,7 @@ function inferEnding(text: string): { type: EndingType; confidence: number } | u
   if (/(?:GOOD\s*END|好结局|グッドエンド)/i.test(text)) return { type: 'good', confidence: 0.97 };
   if (/(?:BAD\s*END|坏结局|バッドエンド)/i.test(text)) return { type: 'bad', confidence: 0.97 };
   if (/(?:NORMAL\s*END|普通结局|ノーマルエンド)/i.test(text)) return { type: 'normal', confidence: 0.97 };
-  if (/(?:\bEnding\s*[A-Z0-9]*\b|【[^】]*结局】|\bEND\b|结局|エンド)/i.test(text)) return { type: 'unknown', confidence: 0.82 };
+  if (/(?:【[^】]*结局】|结局|エンド)/i.test(text) || numberedEndingPattern.test(text)) return { type: 'unknown', confidence: 0.82 };
   return undefined;
 }
 

@@ -6,7 +6,7 @@ import type { GuideNode } from '../../domain/model';
 import { deriveLoadBranchProjections } from '../../domain/loadProjection';
 import { deriveGuideNodeVisualStates, type GuideNodeVisualState } from '../../domain/visualState';
 import { GUIDE_NODE_HEIGHT, GUIDE_NODE_WIDTH, layoutGuide } from '../../layout/elkLayout';
-import { useUiStore } from '../../stores/uiStore';
+import { requestCurrentProjectFocus, useUiStore } from '../../stores/uiStore';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
 
 type GuideFlowData = { guide: GuideNode; visual: GuideNodeVisualState; editing: boolean; hasError: boolean };
@@ -81,12 +81,20 @@ export function GraphView() {
     });
   }, [flow]);
   useEffect(() => { if (selectedNodeId) focusNode(selectedNodeId); }, [focusNode, selectedNodeId]);
-  useEffect(() => { if (focusNodeId && focusRequest > 0) focusNode(focusNodeId); }, [focusNode, focusNodeId, focusRequest]);
+  useEffect(() => {
+    if (!focusNodeId || focusRequest <= 0) return;
+    const frame = window.requestAnimationFrame(() => focusNode(focusNodeId));
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusNode, focusNodeId, focusRequest]);
   const onDragStop: OnNodeDrag<GuideFlowNode> = useCallback((_event, node) => { if (editing && canvasInteractive) void savePosition(node.id, node.position); }, [editing, canvasInteractive, savePosition]);
   const relayout = async () => {
     if (!project || !confirm('重新自动布局会替换全部已保存坐标。确定继续吗？')) return;
     setLayouting(true);
-    try { const positions = await layoutGuide(project.guide); await savePositions(positions); }
+    try {
+      const positions = await layoutGuide(project.guide);
+      await savePositions(positions);
+      requestCurrentProjectFocus(useWorkspaceStore.getState().project ?? project);
+    }
     catch (error) { alert(`自动布局失败，原坐标已保留：${error instanceof Error ? error.message : '未知错误'}`); } finally { setLayouting(false); }
   };
   const onNodeClick = (_event: React.MouseEvent, node: GuideFlowNode) => {
